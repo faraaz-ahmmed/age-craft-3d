@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -17,7 +19,108 @@ class AgeCraftApp extends StatelessWidget {
         colorSchemeSeed: const Color(0xff5b5ce2),
         useMaterial3: true,
       ),
-      home: const AgeCalculatorScreen(),
+      home: const SplashScreen(),
+    );
+  }
+}
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  Timer? timer;
+
+  @override
+  void initState() {
+    super.initState();
+
+    timer = Timer(const Duration(seconds: 2), () {
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const AgeCalculatorScreen(),
+        ),
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xffe9edff),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 130,
+                height: 130,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xffe9edff),
+                  borderRadius: BorderRadius.circular(32),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.white,
+                      offset: Offset(-7, -7),
+                      blurRadius: 14,
+                    ),
+                    BoxShadow(
+                      color: Color(0x405b6b9a),
+                      offset: Offset(7, 7),
+                      blurRadius: 14,
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(25),
+                  child: Image.asset(
+                    'assets/icons/app_icon.png',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 26),
+              const Text(
+                'AgeCraft 3D',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 29,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xff24254f),
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Calculate your age easily',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black54,
+                ),
+              ),
+              const SizedBox(height: 32),
+              const CircularProgressIndicator(
+                color: Color(0xff5b5ce2),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -144,7 +247,9 @@ class _AgeCalculatorScreenState extends State<AgeCalculatorScreen> {
             ),
             child: Center(
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: contentWidth),
+                constraints: BoxConstraints(
+                  maxWidth: contentWidth,
+                ),
                 child: Column(
                   children: [
                     Icon(
@@ -218,7 +323,8 @@ class _AgeCalculatorScreenState extends State<AgeCalculatorScreen> {
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xff5b5ce2),
+                          backgroundColor:
+                              const Color(0xff5b5ce2),
                           foregroundColor: Colors.white,
                           elevation: 10,
                           shadowColor: const Color(0xff5b5ce2),
@@ -242,7 +348,8 @@ class _AgeCalculatorScreenState extends State<AgeCalculatorScreen> {
                       _threeDCard(
                         child: Padding(
                           padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth < 400 ? 8 : 20,
+                            horizontal:
+                                screenWidth < 400 ? 8 : 20,
                             vertical: 28,
                           ),
                           child: Row(
