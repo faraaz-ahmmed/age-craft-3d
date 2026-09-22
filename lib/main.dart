@@ -1,122 +1,338 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const AgeCraftApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class AgeCraftApp extends StatelessWidget {
+  const AgeCraftApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      title: 'AgeCraft 3D',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        colorSchemeSeed: const Color(0xff5b5ce2),
+        useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const AgeCalculatorScreen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class AgeCalculatorScreen extends StatefulWidget {
+  const AgeCalculatorScreen({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<AgeCalculatorScreen> createState() =>
+      _AgeCalculatorScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _AgeCalculatorScreenState extends State<AgeCalculatorScreen> {
+  DateTime? birthDate;
 
-  void _incrementCounter() {
+  int years = 0;
+  int months = 0;
+  int days = 0;
+
+  bool showResult = false;
+
+  Future<void> selectDate() async {
+    final selectedDate = await showDatePicker(
+      context: context,
+      initialDate: birthDate ?? DateTime(2000),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+
+    if (selectedDate == null) return;
+
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      birthDate = selectedDate;
+      showResult = false;
+    });
+  }
+
+  void calculateAge() {
+    if (birthDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select your date of birth'),
+        ),
+      );
+      return;
+    }
+
+    final today = DateTime.now();
+
+    int calculatedYears = today.year - birthDate!.year;
+    int calculatedMonths = today.month - birthDate!.month;
+    int calculatedDays = today.day - birthDate!.day;
+
+    if (calculatedDays < 0) {
+      calculatedDays += DateTime(today.year, today.month, 0).day;
+      calculatedMonths--;
+    }
+
+    if (calculatedMonths < 0) {
+      calculatedMonths += 12;
+      calculatedYears--;
+    }
+
+    setState(() {
+      years = calculatedYears;
+      months = calculatedMonths;
+      days = calculatedDays;
+      showResult = true;
+    });
+  }
+
+  void reset() {
+    setState(() {
+      birthDate = null;
+      years = 0;
+      months = 0;
+      days = 0;
+      showResult = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
+      backgroundColor: const Color(0xffe9edff),
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+        title: const Text(
+          'AgeCraft 3D',
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        actions: [
+          IconButton(
+            onPressed: reset,
+            tooltip: 'Reset',
+            icon: const Icon(Icons.refresh_rounded),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final screenWidth = constraints.maxWidth;
+          final isMobile = screenWidth < 600;
+          final isTablet = screenWidth >= 600 && screenWidth < 1000;
+
+          final horizontalPadding = isMobile
+              ? 20.0
+              : isTablet
+                  ? 40.0
+                  : 60.0;
+
+          final contentWidth = isMobile
+              ? screenWidth
+              : isTablet
+                  ? 650.0
+                  : 700.0;
+
+          return SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding,
+              vertical: 24,
+            ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: contentWidth),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.cake_rounded,
+                      size: isMobile ? 75 : 95,
+                      color: const Color(0xff5b5ce2),
+                    ),
+                    const SizedBox(height: 18),
+                    Text(
+                      'Calculate Your Age',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: isMobile ? 25 : 30,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xff24254f),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Select your date of birth',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black54,
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    _threeDCard(
+                      child: ListTile(
+                        onTap: selectDate,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 8,
+                        ),
+                        leading: const Icon(
+                          Icons.calendar_month_rounded,
+                          size: 30,
+                          color: Color(0xff5b5ce2),
+                        ),
+                        title: Text(
+                          birthDate == null
+                              ? 'Date of birth'
+                              : DateFormat('dd MMMM yyyy')
+                                  .format(birthDate!),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        subtitle: Text(
+                          birthDate == null
+                              ? 'Tap to select date'
+                              : 'Tap to change date',
+                        ),
+                        trailing: const Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 58,
+                      child: ElevatedButton.icon(
+                        onPressed: calculateAge,
+                        icon: const Icon(Icons.calculate_rounded),
+                        label: const Text(
+                          'Calculate Age',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xff5b5ce2),
+                          foregroundColor: Colors.white,
+                          elevation: 10,
+                          shadowColor: const Color(0xff5b5ce2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 35),
+                    if (showResult) ...[
+                      const Text(
+                        'Your Age',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xff24254f),
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      _threeDCard(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth < 400 ? 8 : 20,
+                            vertical: 28,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: _resultItem(
+                                  years.toString(),
+                                  'Years',
+                                ),
+                              ),
+                              _divider(),
+                              Expanded(
+                                child: _resultItem(
+                                  months.toString(),
+                                  'Months',
+                                ),
+                              ),
+                              _divider(),
+                              Expanded(
+                                child: _resultItem(
+                                  days.toString(),
+                                  'Days',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
+    );
+  }
+
+  Widget _threeDCard({required Widget child}) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: const Color(0xffe9edff),
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.white,
+            offset: Offset(-7, -7),
+            blurRadius: 14,
+          ),
+          BoxShadow(
+            color: Color(0x405b6b9a),
+            offset: Offset(7, 7),
+            blurRadius: 14,
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+
+  Widget _resultItem(String value, String label) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
+            color: Color(0xff5b5ce2),
+          ),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.black54,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _divider() {
+    return Container(
+      width: 1,
+      height: 50,
+      color: const Color(0xffc9cee7),
     );
   }
 }
