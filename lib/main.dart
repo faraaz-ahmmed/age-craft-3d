@@ -96,7 +96,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
               const SizedBox(height: 26),
               const Text(
-                'AgeCraft 3D',
+                'Age',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 29,
